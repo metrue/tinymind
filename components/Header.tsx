@@ -5,10 +5,11 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { usePathname, useSearchParams } from "next/navigation";
-import { FaGithub } from "react-icons/fa";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { getUserLogin } from "@/lib/githubApi";
+import { signIn } from "next-auth/react";
+import { Github } from "lucide-react";
 
 export default function Header({
   username,
@@ -98,14 +99,10 @@ export default function Header({
               </Button>
             </div>
           </div>
-          <Link
-            href="https://github.com/mazzzystar/tinymind"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-black hover:text-gray-500"
-          >
-            <FaGithub size={24} />
-          </Link>
+          <Button onClick={() => signIn("github")} className="mt-6">
+          <Github className="mr-2 h-4 w-4" />
+          {t("signInWithGitHub")}
+        </Button>
         </div>
       </div>
     </header>
