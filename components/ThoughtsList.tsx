@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { getThoughts, Thought } from "@/lib/githubApi";
+import { getThoughts, getThoughtsPublic, Thought } from "@/lib/githubApi";
+import { Octokit } from "@octokit/rest";
 import GitHubSignInButton from "./GitHubSignInButton";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -59,8 +60,15 @@ export default function ThoughtsList() {
       }
 
       try {
-        const fetchedThoughts = await getThoughts(session.accessToken);
-        setThoughts(fetchedThoughts);
+        const octokit = new Octokit();
+        const username = process.env.GITHUB_USERNAME
+        if (session.accessToken)  {
+         const fetchedThoughts = await getThoughts(session.accessToken)
+          setThoughts(fetchedThoughts);
+        } else if (username) {
+          const fetchedThoughts = await getThoughtsPublic(octokit, username, "tinymind-blog")
+          setThoughts(fetchedThoughts);
+        }
         setError(null);
       } catch (error) {
         console.error("Error fetching thoughts:", error);
@@ -125,7 +133,13 @@ export default function ThoughtsList() {
   };
 
   if (status === "unauthenticated" || error === "authentication_failed") {
-    return <GitHubSignInButton />;
+    const username = process.env.GITHUB_USERNAME
+    console.warn('+++')
+    console.warn(username)
+    console.warn('+++')
+    if (!username)  {
+      return <GitHubSignInButton />;
+    }
   }
 
   if (error && error !== "authentication_failed") {
