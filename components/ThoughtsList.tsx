@@ -20,21 +20,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AiOutlineEllipsis } from "react-icons/ai";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
 import "katex/dist/katex.min.css";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import { formatTimestamp } from "@/utils/dateFormatting";
 
-export default function ThoughtsList() {
+export default function ThoughtsList({ username }: { username: string }) {
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,26 +40,17 @@ export default function ThoughtsList() {
     async function fetchThoughts() {
       if (status === "loading") return;
       if (status === "unauthenticated") {
-        setError("Please log in to view thoughts");
         setIsLoading(false);
-        return;
-      }
-      if (!session?.accessToken) {
-        setError("Access token not available");
-        setIsLoading(false);
-        return;
       }
 
       try {
         const octokit = new Octokit();
-        const username = process.env.GITHUB_USERNAME
-        if (session.accessToken)  {
-         const fetchedThoughts = await getThoughts(session.accessToken)
-          setThoughts(fetchedThoughts);
-        } else if (username) {
-          const fetchedThoughts = await getThoughtsPublic(octokit, username, "tinymind-blog")
-          setThoughts(fetchedThoughts);
-        }
+        const fetchedThoughts = session?.accessToken
+          ? await getThoughts(session.accessToken)
+          : username
+          ? await getThoughtsPublic(octokit, username, "tinymind-blog")
+          : [];
+        setThoughts(fetchedThoughts);
         setError(null);
       } catch (error) {
         console.error("Error fetching thoughts:", error);
@@ -87,7 +69,7 @@ export default function ThoughtsList() {
     }
 
     fetchThoughts();
-  }, [session, status]);
+  }, [session, status, username]);
 
   const handleDeleteThought = async (id: string) => {
     if (!session?.accessToken) {
@@ -133,11 +115,7 @@ export default function ThoughtsList() {
   };
 
   if (status === "unauthenticated" || error === "authentication_failed") {
-    const username = process.env.GITHUB_USERNAME
-    console.warn('+++')
-    console.warn(username)
-    console.warn('+++')
-    if (!username)  {
+    if (!username) {
       return <GitHubSignInButton />;
     }
   }
@@ -204,33 +182,6 @@ export default function ThoughtsList() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Dialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{t("confirmDelete")}</DialogTitle>
-                    <DialogDescription>{t("undoAction")}</DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">{t("cancel")}</Button>
-                    </DialogClose>
-                    <Button
-                      variant="destructive"
-                      onClick={() => {
-                        if (thoughtToDelete) {
-                          handleDeleteThought(thoughtToDelete);
-                        }
-                        setIsDeleteDialogOpen(false);
-                      }}
-                    >
-                      {t("delete")}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeKatex]}
