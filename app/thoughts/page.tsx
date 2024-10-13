@@ -8,9 +8,9 @@ import PublicThoughtsList from "@/components/PublicThoughtsList";
 
 export default async function ThoughtsPage() {
   const session = await getServerSession(authOptions);
+  const username = process.env.GITHUB_USERNAME ?? '';
 
   if (!session || !session.accessToken) {
-    const username = process.env.GITHUB_USERNAME;
     if (username) {
       const octokit = new Octokit();
       const blogPosts = await getThoughtsPublic(
@@ -32,5 +32,5 @@ export default async function ThoughtsPage() {
     }
   }
 
-  return <ThoughtsList />;
+  return <ThoughtsList username={username} />;
 }
