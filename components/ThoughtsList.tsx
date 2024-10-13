@@ -17,9 +17,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"
 import { AiOutlineEllipsis } from "react-icons/ai";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 import "katex/dist/katex.min.css";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -182,6 +191,33 @@ export default function ThoughtsList({ username }: { username: string }) {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Dialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+              >
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>{t("confirmDelete")}</DialogTitle>
+                    <DialogDescription>{t("undoAction")}</DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">{t("cancel")}</Button>
+                    </DialogClose>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        if (thoughtToDelete) {
+                          handleDeleteThought(thoughtToDelete);
+                        }
+                        setIsDeleteDialogOpen(false);
+                      }}
+                    >
+                      {t("delete")}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
               <ReactMarkdown
                 remarkPlugins={[remarkGfm, remarkMath]}
                 rehypePlugins={[rehypeKatex]}
