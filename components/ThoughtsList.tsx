@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { AiOutlineEllipsis } from "react-icons/ai";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -40,10 +41,16 @@ export default function ThoughtsList({ username }: { username: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [thoughtToDelete, setThoughtToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
   const { data: session, status } = useSession();
   const router = useRouter();
   const t = useTranslations("HomePage");
   const { toast } = useToast();
+
+  const itemsPerPage = 2;
+  const totalPages = Math.ceil(thoughts.length / itemsPerPage);
+  const startIndex = currentPage * itemsPerPage;
+  const visibleThoughts = thoughts.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
     async function fetchThoughts() {
@@ -157,123 +164,235 @@ export default function ThoughtsList({ username }: { username: string }) {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <div className="space-y-4">
-        {thoughts.map((thought) => (
-          <div
-            key={thought.id}
-            className="bg-[#f9f9f9] shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col"
-          >
-            <div className="text-gray-800 mb-2 prose max-w-none">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="text-gray-700 hover:text-black float-right bg-transparent"
-                  >
-                    <AiOutlineEllipsis className="h-5 w-5" />{" "}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      setThoughtToDelete(thought.id);
-                      setIsDeleteDialogOpen(true);
-                    }}
-                  >
-                    {t("delete")}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => {
-                      router.push(`/editor?type=thought&id=${thought.id}`);
-                    }}
-                  >
-                    {t("edit")}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Dialog
-                open={isDeleteDialogOpen}
-                onOpenChange={setIsDeleteDialogOpen}
-              >
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>{t("confirmDelete")}</DialogTitle>
-                    <DialogDescription>{t("undoAction")}</DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">{t("cancel")}</Button>
-                    </DialogClose>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="relative">
+          {currentPage > 0 && (
+            <Button
+              onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+              variant="ghost"
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-1 opacity-50 hover:opacity-100"
+            >
+              <FiChevronLeft className="h-4 w-4" />
+            </Button>
+          )}
+          {visibleThoughts[0] && (
+            <div
+              key={visibleThoughts[0].id}
+              className="bg-[#f9f9f9] shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col"
+            >
+              <div className="text-gray-800 mb-2 prose max-w-none">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <Button
-                      variant="destructive"
-                      onClick={() => {
-                        if (thoughtToDelete) {
-                          handleDeleteThought(thoughtToDelete);
-                        }
-                        setIsDeleteDialogOpen(false);
+                      variant="ghost"
+                      className="text-gray-700 hover:text-black float-right bg-transparent"
+                    >
+                      <AiOutlineEllipsis className="h-5 w-5" />{" "}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setThoughtToDelete(visibleThoughts[0].id);
+                        setIsDeleteDialogOpen(true);
                       }}
                     >
                       {t("delete")}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex]}
-                components={{
-                  code({
-                    inline,
-                    className,
-                    children,
-                    ...props
-                  }: {
-                    inline?: boolean;
-                    className?: string;
-                    children?: React.ReactNode;
-                  } & React.HTMLAttributes<HTMLElement>) {
-                    const match = /language-(\w+)/.exec(className || "");
-                    return !inline && match ? (
-                      <SyntaxHighlighter
-                        style={
-                          tomorrow as { [key: string]: React.CSSProperties }
-                        }
-                        language={match[1]}
-                        PreTag="div"
-                      >
-                        {String(children).replace(/\n$/, "")}
-                      </SyntaxHighlighter>
-                    ) : (
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    );
-                  },
-                  a: ({ children, ...props }) => (
-                    <a
-                      {...props}
-                      className="text-gray-400 no-underline hover:text-gray-600 hover:underline hover:underline-offset-4 transition-colors duration-200 break-words"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push(`/editor?type=thought&id=${visibleThoughts[0].id}`);
+                      }}
                     >
-                      {children}
-                    </a>
-                  ),
-                  blockquote: ({ children }) => (
-                    <div className="pl-4 border-l-4 border-gray-200 text-gray-400">
-                      {children}
-                    </div>
-                  ),
-                }}
-              >
-                {thought.content}
-              </ReactMarkdown>
+                      {t("edit")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Dialog
+                  open={isDeleteDialogOpen}
+                  onOpenChange={setIsDeleteDialogOpen}
+                >
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{t("confirmDelete")}</DialogTitle>
+                      <DialogDescription>{t("undoAction")}</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline">{t("cancel")}</Button>
+                      </DialogClose>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          if (thoughtToDelete) {
+                            handleDeleteThought(thoughtToDelete);
+                          }
+                          setIsDeleteDialogOpen(false);
+                        }}
+                      >
+                        {t("delete")}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    code({
+                      inline,
+                      className,
+                      children,
+                      ...props
+                    }: {
+                      inline?: boolean;
+                      className?: string;
+                      children?: React.ReactNode;
+                    } & React.HTMLAttributes<HTMLElement>) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      return !inline && match ? (
+                        <SyntaxHighlighter
+                          style={
+                            tomorrow as { [key: string]: React.CSSProperties }
+                          }
+                          language={match[1]}
+                          PreTag="div"
+                        >
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    a: ({ children, ...props }) => (
+                      <a
+                        {...props}
+                        className="text-gray-400 no-underline hover:text-gray-600 hover:underline hover:underline-offset-4 transition-colors duration-200 break-words"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {children}
+                      </a>
+                    ),
+                    blockquote: ({ children }) => (
+                      <div className="pl-4 border-l-4 border-gray-200 text-gray-400">
+                        {children}
+                      </div>
+                    ),
+                  }}
+                >
+                  {visibleThoughts[0].content}
+                </ReactMarkdown>
+              </div>
+              <small className="text-gray-500 self-end mt-2">
+                {formatTimestamp(visibleThoughts[0].timestamp)}
+              </small>
             </div>
-            <small className="text-gray-500 self-end mt-2">
-              {formatTimestamp(thought.timestamp)}
-            </small>
-          </div>
-        ))}
+          )}
+        </div>
+
+        <div className="relative">
+          {currentPage < totalPages - 1 && (
+            <Button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+              variant="ghost"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 opacity-50 hover:opacity-100"
+            >
+              <FiChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+          {visibleThoughts[1] && (
+            <div
+              key={visibleThoughts[1].id}
+              className="bg-[#f9f9f9] shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-300 flex flex-col"
+            >
+              <div className="text-gray-800 mb-2 prose max-w-none">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="text-gray-700 hover:text-black float-right bg-transparent"
+                    >
+                      <AiOutlineEllipsis className="h-5 w-5" />{" "}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        setThoughtToDelete(visibleThoughts[1].id);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      {t("delete")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        router.push(`/editor?type=thought&id=${visibleThoughts[1].id}`);
+                      }}
+                    >
+                      {t("edit")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={{
+                    code({
+                      inline,
+                      className,
+                      children,
+                      ...props
+                    }: {
+                      inline?: boolean;
+                      className?: string;
+                      children?: React.ReactNode;
+                    } & React.HTMLAttributes<HTMLElement>) {
+                      const match = /language-(\w+)/.exec(className || "");
+                      return !inline && match ? (
+                        <SyntaxHighlighter
+                          style={
+                            tomorrow as { [key: string]: React.CSSProperties }
+                          }
+                          language={match[1]}
+                          PreTag="div"
+                        >
+                          {String(children).replace(/\n$/, "")}
+                        </SyntaxHighlighter>
+                      ) : (
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    a: ({ children, ...props }) => (
+                      <a
+                        {...props}
+                        className="text-gray-400 no-underline hover:text-gray-600 hover:underline hover:underline-offset-4 transition-colors duration-200 break-words"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {children}
+                      </a>
+                    ),
+                    blockquote: ({ children }) => (
+                      <div className="pl-4 border-l-4 border-gray-200 text-gray-400">
+                        {children}
+                      </div>
+                    ),
+                  }}
+                >
+                  {visibleThoughts[1].content}
+                </ReactMarkdown>
+              </div>
+              <small className="text-gray-500 self-end mt-2">
+                {formatTimestamp(visibleThoughts[1].timestamp)}
+              </small>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
