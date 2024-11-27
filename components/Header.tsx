@@ -52,11 +52,13 @@ const UserInfo = ({
       <time className="text-xs text-gray-400" data-status-datetime="">
         {latestThought ? getRelativeTimeString(latestThought.timestamp) : ""}
       </time>
-      <span className="text-xs text-gray-400">•</span>
       {window.location.pathname !== '/thoughts' && (
-        <Link href="/thoughts" className="text-xs text-gray-400 hover:text-gray-600 underline">
-          more
-        </Link>
+        <>
+          <span className="text-xs text-gray-400">•</span>
+          <Link href="/thoughts" className="text-xs text-gray-400 hover:text-gray-600 underline">
+            more
+          </Link>
+        </>
       )}
     </div>
   </div>
