@@ -53,6 +53,7 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
   const session = await getServerSession(authOptions);
+  const username = process.env.GITHUB_USERNAME ?? '';
 
   const { iconPath } = await getIconPaths(session?.accessToken);
 
@@ -80,7 +81,7 @@ export default async function RootLayout({
       <body className={gowun_wodum.className}>
         <NextIntlClientProvider messages={messages}>
           <SessionProvider>
-            <Header iconUrl={iconPath} />
+            <Header iconUrl={iconPath} username={username} />
             <main className="pb-20">{children}</main>
             <CreateButton messages={messages} />
             <Toaster />
