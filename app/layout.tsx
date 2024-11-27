@@ -83,7 +83,6 @@ export default async function RootLayout({
           <SessionProvider>
             <Header iconUrl={iconPath} />
             <main className="pb-20">{children}</main>
-            <Footer />
             <CreateButton messages={messages} />
             <Toaster />
           </SessionProvider>
