@@ -82,7 +82,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <SessionProvider>
             <Header iconUrl={iconPath} />
-            <main className="pt-20 pb-20">{children}</main>
+            <main className="pb-20">{children}</main>
             <Footer />
             <CreateButton messages={messages} />
             <Toaster />
