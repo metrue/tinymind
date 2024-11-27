@@ -18,7 +18,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import Link from 'next/link';
 import { AiOutlineEllipsis } from "react-icons/ai";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -129,10 +128,9 @@ const ThoughtCard = ({ thought, onDelete, onEdit }: ThoughtCardProps) => {
 
 interface ThoughtsListProps {
   username: string;
-  showTimelineLink?: boolean;
 }
 
-export default function ThoughtsList({ username, showTimelineLink = false }: ThoughtsListProps) {
+export default function ThoughtsList({ username }: ThoughtsListProps) {
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);

@@ -3,7 +3,6 @@
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 const GitHubSignInButton = () => {
   return (
