@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import ThoughtsList from "@/components/ThoughtsList";
+import React from 'react';
 import BlogPage from './blog/page';
 
 export default function Home() {

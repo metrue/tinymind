@@ -33,7 +33,7 @@ import {
 import "katex/dist/katex.min.css";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-import { getRelativeTimeString } from "@/utils/dateFormatting";
+import { formatTimestamp } from "@/utils/dateFormatting";
 
 interface ThoughtCardProps {
   thought: Thought;
@@ -121,7 +121,7 @@ const ThoughtCard = ({ thought, onDelete, onEdit }: ThoughtCardProps) => {
         </ReactMarkdown>
       </div>
       <small className="text-gray-500 self-end mt-2">
-        {getRelativeTimeString(thought.timestamp)}
+        {formatTimestamp(thought.timestamp)}
       </small>
     </div>
   );
@@ -138,16 +138,10 @@ export default function ThoughtsList({ username, showTimelineLink = false }: Tho
   const [isLoading, setIsLoading] = useState(true);
   const [thoughtToDelete, setThoughtToDelete] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
   const { data: session, status } = useSession();
   const router = useRouter();
   const t = useTranslations("HomePage");
   const { toast } = useToast();
-
-  const itemsPerPage = 2;
-  const totalPages = Math.ceil(thoughts.length / itemsPerPage);
-  const startIndex = currentPage * itemsPerPage;
-  const visibleThoughts = thoughts.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
     async function fetchThoughts() {
@@ -270,13 +264,7 @@ export default function ThoughtsList({ username, showTimelineLink = false }: Tho
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-       {showTimelineLink && (
-         <Link href="/thoughts">
-          <div className="flex flex-col items-start text-sm underline underline-offset-4 py-6">
-            Timeline
-          </div>
-         </Link>
-       )}
+     
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -303,25 +291,15 @@ export default function ThoughtsList({ username, showTimelineLink = false }: Tho
       </Dialog>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="relative">
-          {visibleThoughts[0] && (
+        {thoughts.map((thought) => (
+          <div key={thought.id} className="relative">
             <ThoughtCard
-              thought={visibleThoughts[0]}
+              thought={thought}
               onDelete={handleDelete}
               onEdit={handleEdit}
             />
-          )}
-        </div>
-
-        <div className="relative">
-          {visibleThoughts[1] && (
-            <ThoughtCard
-              thought={visibleThoughts[1]}
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-            />
-          )}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

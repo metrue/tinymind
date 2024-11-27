@@ -6,8 +6,6 @@ import { Github } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 const GitHubSignInButton = () => {
-  const t = useTranslations("HomePage");
-
   return (
     <Button 
       onClick={() => signIn("github")} 

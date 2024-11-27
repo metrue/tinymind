@@ -4,7 +4,6 @@ import "./globals.css";
 import Header from "@/components/Header";
 import { SessionProvider } from "../components/SessionProvider";
 import Script from "next/script";
-import Footer from "@/components/Footer";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Toaster } from "@/components/ui/toaster";
