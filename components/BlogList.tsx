@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { BlogPost } from "@/lib/githubApi";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { BlogCard } from "./PublicBlogList";
+import { getFirstImageURLFrom } from "./PublicBlogList";
 
 function decodeTitle(title: string): string {
   try {
@@ -37,46 +39,35 @@ export default function BlogList({ posts }: { posts: BlogPost[] }) {
     );
   }
 
-  const sortedPosts = [...posts].sort(
+  const sorted = [...posts].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+  const sortedPosts = sorted.map((p) => {
+      return {
+        ...p,
+        imageUrl: getFirstImageURLFrom(p.content)
+      }
 
-  const groupedPosts = sortedPosts.reduce((acc, post) => {
-    const year = new Date(post.date).getFullYear();
-    if (!acc[year]) acc[year] = [];
-    acc[year].push(post);
-    return acc;
-  }, {} as Record<number, BlogPost[]>);
-
-  const sortedYears = Object.keys(groupedPosts).sort(
-    (a, b) => Number(b) - Number(a)
-  );
-
+  });
+  
   return (
-    <div className="max-w-2xl mx-auto px-4 py-12">
-      {sortedYears.map((year) => (
-        <div key={year} className="mb-16">
-          <h2 className="text-2xl font-serif font-light text-gray-400 mb-6">
-            {year}
-          </h2>
-          <ul className="space-y-4">
-            {groupedPosts[Number(year)].map((post) => (
-              <li key={post.id} className="flex items-center">
-                <Link
-                  href={`/blog/${post.id.replace(".md", "")}`}
-                  className="text-gray-700 hover:text-gray-400 transition-colors duration-200"
-                >
-                  {decodeTitle(post.title)}
-                </Link>
-                <span className="flex-grow border-b border-dotted border-gray-300 mx-2" />{" "}
-                <span className="text-sm text-gray-400 font-light whitespace-nowrap">
-                  {formatDate(post.date)}
-                </span>
-              </li>
-            ))}
-          </ul>
+    <div className="max-w-2xl mx-auto p-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-4">
+        {
+          sortedPosts
+            .filter((_, index) => index % 2 === 0)
+            .map((post) => <BlogCard key={post.id} post={post} username={'metrue'} />)
+        }
         </div>
-      ))}
+        <div className="flex flex-col gap-2">
+        { 
+          sortedPosts
+            .filter((_, index) => index % 2 !== 0)
+            .map((post) => <BlogCard key={post.id} post={post} username={'metrue'} />)
+        }
+        </div>
+      </div>
     </div>
   );
 }

@@ -5,43 +5,40 @@ import { BlogPost } from "@/lib/githubApi";
 import Link from "next/link";
 import Image from 'next/image';
 
-const BlogCard = ({ post, username }: { post: BlogPost; username: string }) => (
+export function getFirstImageURLFrom(content: string): string | null {
+  // Regular expression to match URLs ending with common image extensions
+  const imgRegex = /(https?:\/\/[^\s]+?\.(?:png|jpg|jpeg|gif|webp))/i;
+  const match = imgRegex.exec(content);
+
+  return match ? match[1] : null; // Return the URL if found, otherwise null
+}
+
+
+export const BlogCard = ({ post, username }: { post: BlogPost; username: string }) => (
   <div
     role="listitem"
-    className={`tile-item nr-scroll-animation bg-light rounded-lg border-lightgrey`}
-
-          style={{
-            backgroundImage: `url(${post.imageUrl})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            height: 'auto',
-            minHeight: '200px',
-    borderWidth: '0.5px',
-    borderColor: 'lightgrey',
-    padding: '16px',
-          }}
+    className="nr-scroll-animation bg-light rounded-lg relative overflow-hidden aspect-[4/3] md:aspect-[3/2]"
+    style={{
+      backgroundImage: `url(${post.imageUrl})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    }}
   >
+    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
     <Link
       href={`/${username}/blog/${encodeURIComponent(post.id)}`}
-      className={`tile large-load medium-load small-loads`}
+      className="large-load medium-load small-loads relative z-10 flex flex-col justify-end p-6"
       aria-label={post.title}
     >
-      {/* Media Section */}
-      <div className="tile__media" aria-hidden="true">
-      <div className="tile__description" aria-hidden="true" style={{color: 'black', fontWeight: 'bold', fontSize: '2em'}}>
-        {/* Headline */}
-        <div className="tile__head">
-          <div className="tile__headline">{post.title}</div>
-        </div>
+      <div className="space-y-2">
+        <h3 className="text-white font-semibold text-xl lg:text-2xl leading-tight">
+          {post.title}
+        </h3>
 
-        {/* Timestamp */}
-        <div className="tile__timestamp icon-hide icon icon-before icon-clock">
+        <p className="text-white text-sm font-light">
           {formatDate(post.date)}
-        </div>
+        </p>
       </div>
-        </div>
-
-      {/* Description Section */}
     </Link>
   </div>
 );
@@ -58,31 +55,38 @@ export default function PublicBlogList({
   posts: BlogPost[];
   username: string;
 }) {
-  // const [sortedPosts, setSortedPosts] = useState<BlogPost[]>([]);
+   const [sortedPosts, setSortedPosts] = useState<BlogPost[]>([]);
 
-  // useEffect(() => {
-  //   const sorted = [...posts].sort(
-  //     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  //   );
-  //   setSortedPosts(sorted);
-  // }, [posts]);
+  
+  useEffect(() => {
+    const sorted = [...posts].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    setSortedPosts(sorted.map((p) => {
+        return {
+          ...p,
+          imageUrl: getFirstImageURLFrom(p.content)
+        }
+
+    }));
+  }, [posts]);
 
   return (
     <div className="max-w-2xl mx-auto p-4">
       <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-4">
-        {[
-          { id: 'a', title: 'Hello World', content: 'aaa', date: new Date().toString(), imageUrl: 'https://github.com/metrue/picx-images-hosting/raw/master/IMG_2285.77dg8ua2cl.jpg'},
-          { id: 'a', title: 'Hello World', content: 'aaa', date: new Date().toString(), imageUrl: 'https://l.ruby-china.com/photo/2020/9bb10c7a-169e-4733-8c88-1d26bb1faf29.png'}].map((post) => (
-            <BlogCard key={post.id} post={post} username={username} />
-        ))}
+        {
+          sortedPosts
+            .filter((_, index) => index % 2 === 0)
+            .map((post) => <BlogCard key={post.id} post={post} username={username} />)
+        }
         </div>
         <div className="flex flex-col gap-2">
-        {[{ id: 'a', title: 'Hello World', content: 'aaa', date: new Date().toString(),imageUrl: 'https://l.ruby-china.com/photo/2020/9bb10c7a-169e-4733-8c88-1d26bb1faf29.png' },
-          { id: 'a', title: 'Hello World', content: 'aaa', date: new Date().toString(), imageUrl: 'https://l.ruby-china.com/photo/2020/9bb10c7a-169e-4733-8c88-1d26bb1faf29.png'}, 
-          { id: 'a', title: 'Hello World', content: 'aaa', date: new Date().toString(), imageUrl: 'https://l.ruby-china.com/photo/2020/9bb10c7a-169e-4733-8c88-1d26bb1faf29.png'}].map((post) => (
-            <BlogCard key={post.id} post={post} username={username} />
-        ))}
+        { 
+          sortedPosts
+            .filter((_, index) => index % 2 !== 0)
+            .map((post) => <BlogCard key={post.id} post={post} username={username} />)
+        }
         </div>
       </div>
     </div>
