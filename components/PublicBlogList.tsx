@@ -13,7 +13,7 @@ export function getFirstImageURLFrom(content: string): string | null {
 }
 
 
-export const BlogCard = ({ post, username }: { post: BlogPost & { imageUrl: string }; username: string }) => (
+export const BlogCard = ({ post, username }: { post: BlogPost & { imageUrl: string | null }; username: string }) => (
   <div
     role="listitem"
     className="nr-scroll-animation bg-light rounded-lg relative overflow-hidden aspect-[4/3] md:aspect-[3/2]"
