@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { BlogPost } from "@/lib/githubApi";
 import Link from "next/link";
-import Image from 'next/image';
 
 export function getFirstImageURLFrom(content: string): string | null {
   // Regular expression to match URLs ending with common image extensions
@@ -14,7 +13,7 @@ export function getFirstImageURLFrom(content: string): string | null {
 }
 
 
-export const BlogCard = ({ post, username }: { post: BlogPost; username: string }) => (
+export const BlogCard = ({ post, username }: { post: BlogPost & { imageUrl: string }; username: string }) => (
   <div
     role="listitem"
     className="nr-scroll-animation bg-light rounded-lg relative overflow-hidden aspect-[4/3] md:aspect-[3/2]"

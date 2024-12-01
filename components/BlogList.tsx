@@ -1,25 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BlogPost } from "@/lib/githubApi";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { BlogCard } from "./PublicBlogList";
 import { getFirstImageURLFrom } from "./PublicBlogList";
-
-function decodeTitle(title: string): string {
-  try {
-    return decodeURIComponent(title);
-  } catch {
-    return title;
-  }
-}
-
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toISOString().split("T")[0]; // Returns YYYY-MM-DD format
-}
 
 export default function BlogList({ posts }: { posts: BlogPost[] }) {
   const router = useRouter();
