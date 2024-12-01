@@ -4,16 +4,7 @@ import { useState, useEffect } from "react";
 import { BlogPost } from "@/lib/githubApi";
 import Link from "next/link";
 
-export function getFirstImageURLFrom(content: string): string | null {
-  // Regular expression to match URLs ending with common image extensions
-  const imgRegex = /(https?:\/\/[^\s]+?\.(?:png|jpg|jpeg|gif|webp))/i;
-  const match = imgRegex.exec(content);
-
-  return match ? match[1] : null; // Return the URL if found, otherwise null
-}
-
-
-export const BlogCard = ({ post, username }: { post: BlogPost & { imageUrl: string | null }; username: string }) => (
+export const BlogCard = ({ post, username }: { post: BlogPost; username: string }) => (
   <div
     role="listitem"
     className="nr-scroll-animation bg-light rounded-lg relative overflow-hidden aspect-[4/3] md:aspect-[3/2]"
@@ -61,13 +52,7 @@ export default function PublicBlogList({
     const sorted = [...posts].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-    setSortedPosts(sorted.map((p) => {
-        return {
-          ...p,
-          imageUrl: getFirstImageURLFrom(p.content)
-        }
-
-    }));
+    setSortedPosts(sorted);
   }, [posts]);
 
   return (

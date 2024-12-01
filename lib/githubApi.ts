@@ -8,6 +8,7 @@ export interface BlogPost {
   id: string;
   title: string;
   content: string;
+  imageUrl: string | null;
   date: string;
 }
 
@@ -194,10 +195,19 @@ export async function getBlogPosts(accessToken: string): Promise<BlogPost[]> {
               const titleMatch = content.match(/title:\s*(.+)/);
               const title = titleMatch ? titleMatch[1] : file.name.replace('.md', '');
 
+              const getFirstImageURLFrom = (content: string): string | null => {
+                // Regular expression to match URLs ending with common image extensions
+                const imgRegex = /(https?:\/\/[^\s]+?\.(?:png|jpg|jpeg|gif|webp))/i;
+                const match = imgRegex.exec(content);
+              
+                return match ? match[1] : null; // Return the URL if found, otherwise null
+              }
+
               return {
                 id: file.name.replace('.md', ''),
                 title,
                 content,
+                imageUrl: getFirstImageURLFrom(content),
                 date,
               };
             }
